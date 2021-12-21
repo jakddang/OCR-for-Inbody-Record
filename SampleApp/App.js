@@ -56,7 +56,7 @@ export default class App extends React.Component {
     };
   }
   async UNSAFE_componentWillMount() {
-    //AsyncStorage.clear()
+    //AsyncStorage.clear();
     try {
       const ddayString = await AsyncStorage.getItem('@dday');
       const chatLogString = await AsyncStorage.getItem('@chat');
@@ -165,14 +165,14 @@ export default class App extends React.Component {
     fetch(url)
       .then(response => response.json())
       .then(response => JSON.stringify(response))
-      .then(response => this.setState({result: response}))
-      .then(console.log('result: ', this.state.result))
-      .then(
+      //.then(response => this.setState({result: response}))
+      //.then(response => console.log('result: ', response))
+      .then(response =>
         this.setState(
           {
             resultLog: [
               ...this.state.resultLog,
-              this.makeDateString() + ' : ' + this.state.result,
+              this.makeDateString() + ' : ' + response,
             ],
           },
           async () => {
@@ -181,7 +181,25 @@ export default class App extends React.Component {
           },
         ),
       )
-      .catch(error => console.log('error: ', error));
+      .catch(error =>
+        this.setState(
+          {
+            resultLog: [
+              ...this.state.resultLog,
+              this.makeDateString() +
+                ' : ' +
+                '요청이 올바르지 않습니다.\n' +
+                '[' +
+                error +
+                ']',
+            ],
+          },
+          async () => {
+            const resultLogString = JSON.stringify(this.state.resultLog);
+            await AsyncStorage.setItem('@result', resultLogString);
+          },
+        ),
+      );
     this.chatHandler();
   }
 
@@ -219,7 +237,6 @@ export default class App extends React.Component {
                 value={this.state.chatInput}
                 onChangeText={changedText => {
                   this.setState({chatInput: changedText});
-                  console.log(this.state.chatInput);
                 }}
               />
               <TouchableOpacity
